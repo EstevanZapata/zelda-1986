@@ -5,8 +5,12 @@ extends CharacterBody2D
 @export var is_attacking : bool = false
 @export var facing_direction := Vector2.DOWN
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
+var can_move: bool = true
 
 func _physics_process(delta: float) -> void:
+	if not can_move:
+		velocity= Vector2.ZERO
+		return
 	
 	if Input.is_action_just_pressed("ATACAR"):
 		attack()
@@ -55,3 +59,20 @@ func attack() -> void:
 		animated_sprite_2d.play("attack_right")
 	await  animated_sprite_2d.animation_finished
 	is_attacking = false
+
+func move_screen_transiton_player(direction: Vector2, distance: float)->void:
+	can_move = false
+	
+	#Verificar la direccion del pesonaje y hacia esa dirreccion voy a ejecutar la animacion
+	if direction.x > 0:
+		animated_sprite_2d.play("walk_right")
+	elif direction.x <0:
+		animated_sprite_2d.play("attack_left")
+	elif direction.y >0:
+		animated_sprite_2d.play("walk_down")
+	elif direction.y <0:
+		animated_sprite_2d.play("walk_up")
+		
+	var tween = create_tween()
+	tween.tween_property(self, "position", position + direction * distance, 0.5)
+	await tween.finished
